@@ -1,13 +1,10 @@
 {
-  "name": "express-hello-world",
+  "name": "lucyofm-bot",
   "version": "1.0.0",
+  "description": "LucyOFM Bot",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "openai": "^4.0.0"
-  }
-}
