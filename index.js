@@ -21,10 +21,6 @@ app.post("/api/ask", async (req, res) => {
   try {
     const { question } = req.body;
 
-    if (!question || question.trim() === "") {
-      return res.status(400).json({ error: "Întrebarea nu poate fi goală" });
-    }
-
     const completion = await client.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: question }],
@@ -32,16 +28,20 @@ app.post("/api/ask", async (req, res) => {
 
     res.json({ answer: completion.choices[0].message.content });
   } catch (err) {
-    console.error("Eroare API:", err);
-    res.status(500).json({ error: "Eroare la procesarea întrebării" });
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Eroare la procesarea întrebării. Verifică cheia API." });
   }
 });
 
-// Rădăcina aplicației trimite direct index.html
+// La accesarea "/": trimitem fișierul index.html din public
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // Pornim serverul
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Serverul rulează pe portul ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Serverul rulează pe portul ${PORT}`)
+);
