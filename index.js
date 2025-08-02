@@ -16,7 +16,7 @@ const client = new OpenAI({
 app.post("/api/ask", async (req, res) => {
   try {
     const { question } = req.body;
-    
+
     const prompt = `Realizează o analiză în 10 puncte pentru meciul ${question}.
     Include informații despre forma echipelor, statistici, jucători importanți, tactici, scor estimat și recomandări de pariu.`;
 
