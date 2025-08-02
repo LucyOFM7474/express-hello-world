@@ -6,15 +6,15 @@
   <title>LucyOFM Bot</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    input, button { padding: 10px; margin-top: 10px; }
-    #answer { margin-top: 20px; font-weight: bold; }
+    input, button { padding: 10px; margin-top: 10px; width: 300px; }
+    #answer { margin-top: 20px; font-weight: bold; white-space: pre-line; }
   </style>
 </head>
 <body>
-  <h1>Întreabă Botul LucyOFM</h1>
-  <input type="text" id="question" placeholder="Scrie întrebarea aici..." size="50">
+  <h1>Analiza meciurilor</h1>
+  <input type="text" id="question" placeholder="Scrie meciul (ex: Dinamo - FCSB)" />
   <br>
-  <button onclick="ask()">Trimite</button>
+  <button onclick="ask()">Generează analiza</button>
   <div id="answer"></div>
 
   <script>
