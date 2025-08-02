@@ -1,38 +1,35 @@
 import express from "express";
 import bodyParser from "body-parser";
-import path from "path";
+import dotenv from "dotenv";
 import OpenAI from "openai";
 
+dotenv.config();
 const app = express();
-const port = process.env.PORT || 10000;
+app.use(bodyParser.json());
 
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-app.use(bodyParser.json());
-app.use(express.static(path.resolve("./public")));
-
-app.post("/ask", async (req, res) => {
-  const { question } = req.body;
-
-  if (!question) {
-    return res.json({ reply: "Nu ai introdus nicio întrebare." });
-  }
-
+// Endpoint pentru întrebări
+app.post("/api/ask", async (req, res) => {
   try {
-    const response = await client.chat.completions.create({
+    const { question } = req.body;
+
+    const completion = await client.chat.completions.create({
       model: "gpt-4o",
-      messages: [
-        { role: "system", content: "Ești LucyOFM Bot și răspunzi clar, în 10 puncte, fără contradicții." },
-        { role: "user", content: question }
-      ]
+      messages: [{ role: "user", content: question }],
     });
 
-    res.json({ reply: response.choices[0].message.content });
-  } catch (error) {
-    res.status(500).json({ reply: "Eroare la conectarea cu GPT‑4o." });
+    res.json({ answer: completion.choices[0].message.content });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Eroare la procesarea întrebării" });
   }
 });
 
-app.listen(port, () => console.log(`LucyOFM Bot rulează pe portul ${port}`));
+// Servim fișierele statice
+app.use(express.static("public"));
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`Serverul rulează pe portul ${PORT}`));
