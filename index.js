@@ -12,15 +12,18 @@ app.use(bodyParser.json());
 // Servim fișierele statice din folderul public
 app.use(express.static(path.join(__dirname, "public")));
 
-// Inițializăm clientul OpenAI
+// Endpoint pentru întrebări
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Endpoint pentru întrebări
 app.post("/api/ask", async (req, res) => {
   try {
     const { question } = req.body;
+
+    if (!question || question.trim() === "") {
+      return res.status(400).json({ error: "Întrebarea nu poate fi goală" });
+    }
 
     const completion = await client.chat.completions.create({
       model: "gpt-4o",
@@ -29,20 +32,16 @@ app.post("/api/ask", async (req, res) => {
 
     res.json({ answer: completion.choices[0].message.content });
   } catch (err) {
-    console.error(err);
-    res
-      .status(500)
-      .json({ error: "Eroare la procesarea întrebării" });
+    console.error("Eroare API:", err);
+    res.status(500).json({ error: "Eroare la procesarea întrebării" });
   }
 });
 
-// Redirecționează / către index.html
+// Rădăcina aplicației trimite direct index.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // Pornim serverul
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () =>
-  console.log(`Serverul rulează pe portul ${PORT}`)
-);
+app.listen(PORT, () => console.log(`Serverul rulează pe portul ${PORT}`));
