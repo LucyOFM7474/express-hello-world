@@ -1,55 +1,38 @@
 import express from "express";
 import bodyParser from "body-parser";
-import dotenv from "dotenv";
+import path from "path";
 import OpenAI from "openai";
 
-dotenv.config();
 const app = express();
 const port = process.env.PORT || 10000;
 
-app.use(bodyParser.json());
-
-// Inițializăm clientul OpenAI
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// Pagina principală – formular întrebări
-app.get("/", (req, res) => {
-  res.send(`
-    <h1>LucyOFM Bot GPT-4o</h1>
-    <form method="POST" action="/ask">
-      <textarea name="question" rows="4" cols="50" placeholder="Pune întrebarea aici..."></textarea><br>
-      <button type="submit">Trimite</button>
-    </form>
-  `);
-});
+app.use(bodyParser.json());
+app.use(express.static(path.resolve("./public")));
 
-// Endpoint pentru întrebări
-app.post("/ask", express.urlencoded({ extended: true }), async (req, res) => {
-  const question = req.body.question;
+app.post("/ask", async (req, res) => {
+  const { question } = req.body;
+
   if (!question) {
-    return res.send("Te rog să pui o întrebare!");
+    return res.json({ reply: "Nu ai introdus nicio întrebare." });
   }
 
   try {
-    const response = await client.responses.create({
+    const response = await client.chat.completions.create({
       model: "gpt-4o",
-      input: question
+      messages: [
+        { role: "system", content: "Ești LucyOFM Bot și răspunzi clar, în 10 puncte, fără contradicții." },
+        { role: "user", content: question }
+      ]
     });
 
-    res.send(`
-      <h1>Întrebarea ta:</h1>
-      <p>${question}</p>
-      <h2>Răspuns GPT-4o:</h2>
-      <p>${response.output_text}</p>
-      <a href="/">Pune altă întrebare</a>
-    `);
+    res.json({ reply: response.choices[0].message.content });
   } catch (error) {
-    res.send("Eroare la generarea răspunsului: " + error.message);
+    res.status(500).json({ reply: "Eroare la conectarea cu GPT‑4o." });
   }
 });
 
-app.listen(port, () => {
-  console.log(`Serverul rulează pe portul ${port}`);
-});
+app.listen(port, () => console.log(`LucyOFM Bot rulează pe portul ${port}`));
